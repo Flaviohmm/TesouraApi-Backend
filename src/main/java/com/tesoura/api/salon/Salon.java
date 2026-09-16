@@ -35,7 +35,7 @@ public class Salon {
     private String address;
 
     @Column(length = 50)
-    private String timezone = "America/Sao_Paulo";
+    private String timezone = "America/Recife";
 
     @Column(name = "logo_url")
     private String logoUrl;

@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 
 public final class DateTimeUtils {
 
-    public static final ZoneId DEFAULT_ZONE = ZoneId.of("America/Sao_Paulo");
+    public static final ZoneId DEFAULT_ZONE = ZoneId.of("America/Recife");
 
     private DateTimeUtils() {
     }
