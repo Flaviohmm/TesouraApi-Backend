@@ -17,6 +17,7 @@ import java.util.UUID;
 public class NotificationDispatchService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationDispatchService.class);
+    private static final String TYPE_APPOINTMENT_REMINDER = "appointment_reminder";
 
     private final NotificationRepository notificationRepository;
 
@@ -31,6 +32,7 @@ public class NotificationDispatchService {
         Notification reminder = new Notification();
         reminder.setSalonId(appointment.getSalonId());
         reminder.setAppointmentId(appointment.getId());
+        reminder.setType(TYPE_APPOINTMENT_REMINDER);
         reminder.setChannel(NotificationChannel.WHATSAPP);
         reminder.setStatus(NotificationStatus.PENDING);
         reminder.setRecipient("client-phone-placeholder");

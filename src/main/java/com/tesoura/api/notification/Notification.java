@@ -34,6 +34,9 @@ public class Notification implements TenantAware {
     @Column(name = "appointment_id", nullable = false)
     private UUID appointmentId;
 
+    @Column(name = "type", nullable = false, length = 40)
+    private String type;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "channel", nullable = false, columnDefinition = "notification_channel")
@@ -89,6 +92,14 @@ public class Notification implements TenantAware {
 
     public void setAppointmentId(UUID appointmentId) {
         this.appointmentId = appointmentId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public NotificationChannel getChannel() {
