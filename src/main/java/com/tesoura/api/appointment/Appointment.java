@@ -68,6 +68,12 @@ public class Appointment implements TenantAware {
     @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
+    @Column(name = "loyalty_points_redeemed", nullable = false)
+    private int loyaltyPointsRedeemed;
+
+    @Column(name = "loyalty_discount_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal loyaltyDiscountAmount = BigDecimal.ZERO;
+
     private String notes;
 
     @Column(name = "created_via", length = 20)
@@ -162,6 +168,22 @@ public class Appointment implements TenantAware {
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public int getLoyaltyPointsRedeemed() {
+        return loyaltyPointsRedeemed;
+    }
+
+    public void setLoyaltyPointsRedeemed(int loyaltyPointsRedeemed) {
+        this.loyaltyPointsRedeemed = loyaltyPointsRedeemed;
+    }
+
+    public BigDecimal getLoyaltyDiscountAmount() {
+        return loyaltyDiscountAmount;
+    }
+
+    public void setLoyaltyDiscountAmount(BigDecimal loyaltyDiscountAmount) {
+        this.loyaltyDiscountAmount = loyaltyDiscountAmount;
     }
 
     public String getNotes() {

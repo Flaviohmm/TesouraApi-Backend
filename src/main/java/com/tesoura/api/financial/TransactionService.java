@@ -29,7 +29,6 @@ public class TransactionService {
         income.setType(TransactionType.INCOME);
         income.setAmount(appointment.getTotalPrice());
         income.setDescription("Receita do agendamento " + appointment.getId());
-        income.setReferenceId(appointment.getId());
         transactionRepository.save(income);
     }
 }

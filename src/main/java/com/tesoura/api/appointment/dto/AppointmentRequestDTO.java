@@ -1,5 +1,6 @@
 package com.tesoura.api.appointment.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -16,6 +17,7 @@ public record AppointmentRequestDTO(
         String notes,
         String createdVia,
         BigDecimal depositAmount,
-        Boolean depositPaid
+        Boolean depositPaid,
+        @Min(0) Integer redeemPoints
 ) {
 }

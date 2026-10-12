@@ -46,9 +46,6 @@ public class Transaction implements TenantAware {
     @Column(name = "description", length = 255)
     private String description;
 
-    @Column(name = "reference_id")
-    private UUID referenceId;
-
     @Column(name = "created_at", updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -100,14 +97,6 @@ public class Transaction implements TenantAware {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public UUID getReferenceId() {
-        return referenceId;
-    }
-
-    public void setReferenceId(UUID referenceId) {
-        this.referenceId = referenceId;
     }
 
     public Instant getCreatedAt() {

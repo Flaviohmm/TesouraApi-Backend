@@ -5,6 +5,7 @@ import com.tesoura.api.appointment.dto.AppointmentResponseDTO;
 import com.tesoura.api.client.Client;
 import com.tesoura.api.client.ClientService;
 import com.tesoura.api.financial.TransactionService;
+import com.tesoura.api.loyalty.LoyaltyService;
 import com.tesoura.api.notification.NotificationDispatchService;
 import com.tesoura.api.professional.Professional;
 import com.tesoura.api.professional.ProfessionalService;
@@ -35,6 +36,7 @@ public class AppointmentService {
     private final ProfessionalService professionalService;
     private final NotificationDispatchService notificationDispatchService;
     private final TransactionService transactionService;
+    private final LoyaltyService loyaltyService;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
@@ -43,7 +45,8 @@ public class AppointmentService {
             ClientService clientService,
             ProfessionalService professionalService,
             NotificationDispatchService notificationDispatchService,
-            TransactionService transactionService
+            TransactionService transactionService,
+            LoyaltyService loyaltyService
     ) {
         this.appointmentRepository = appointmentRepository;
         this.hairServiceRepository = hairServiceRepository;
@@ -52,6 +55,7 @@ public class AppointmentService {
         this.professionalService = professionalService;
         this.notificationDispatchService = notificationDispatchService;
         this.transactionService = transactionService;
+        this.loyaltyService = loyaltyService;
     }
 
     @Transactional(readOnly = true)
@@ -80,6 +84,15 @@ public class AppointmentService {
         Instant endsAt = request.startsAt().plus(snapshot.durationMinutes(), ChronoUnit.MINUTES);
         assertNoConflict(professional.getId(), request.startsAt(), endsAt, null);
 
+        int redeemPoints = request.redeemPoints() == null ? 0 : request.redeemPoints();
+        BigDecimal discount = loyaltyService.discountForPoints(redeemPoints);
+        if (discount.compareTo(snapshot.totalPrice()) > 0) {
+            throw ApiException.badRequest("Pontos resgatados excedem o valor do atendimento");
+        }
+        if (redeemPoints > 0) {
+            loyaltyService.debit(client, redeemPoints, "Resgate no agendamento");
+        }
+
         Appointment appointment = new Appointment();
         appointment.setClient(client);
         appointment.setProfessional(professional);
@@ -90,7 +103,9 @@ public class AppointmentService {
         appointment.setCreatedVia(request.createdVia() == null ? "manual" : request.createdVia());
         appointment.setDepositAmount(request.depositAmount());
         appointment.setDepositPaid(Boolean.TRUE.equals(request.depositPaid()));
-        appointment.setTotalPrice(snapshot.totalPrice());
+        appointment.setTotalPrice(snapshot.totalPrice().subtract(discount));
+        appointment.setLoyaltyPointsRedeemed(redeemPoints);
+        appointment.setLoyaltyDiscountAmount(discount);
         attachServices(appointment, snapshot.items());
 
         Appointment saved = appointmentRepository.save(appointment);
@@ -112,6 +127,11 @@ public class AppointmentService {
         Instant endsAt = request.startsAt().plus(snapshot.durationMinutes(), ChronoUnit.MINUTES);
         assertNoConflict(professional.getId(), request.startsAt(), endsAt, appointment.getId());
 
+        BigDecimal discount = appointment.getLoyaltyDiscountAmount();
+        if (discount.compareTo(snapshot.totalPrice()) > 0) {
+            throw ApiException.badRequest("O novo valor do atendimento é menor que o desconto de fidelidade já aplicado");
+        }
+
         appointment.setClient(client);
         appointment.setProfessional(professional);
         appointment.setStartsAt(request.startsAt());
@@ -121,7 +141,7 @@ public class AppointmentService {
         if (request.depositPaid() != null) {
             appointment.setDepositPaid(request.depositPaid());
         }
-        appointment.setTotalPrice(snapshot.totalPrice());
+        appointment.setTotalPrice(snapshot.totalPrice().subtract(discount));
         appointment.getServices().clear();
         attachServices(appointment, snapshot.items());
 
@@ -138,6 +158,8 @@ public class AppointmentService {
 
         if (status == AppointmentStatus.COMPLETED && previous != AppointmentStatus.COMPLETED) {
             transactionService.recordAppointmentCompletion(appointment);
+            int earned = loyaltyService.pointsEarnedFor(appointment.getTotalPrice());
+            loyaltyService.credit(appointment.getClient(), earned, "Atendimento concluído");
         }
         if (status == AppointmentStatus.CANCELLED) {
             notificationDispatchService.cancelPendingForAppointment(appointment.getId());
