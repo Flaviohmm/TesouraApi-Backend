@@ -74,4 +74,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             @Param("rangeEnd") Instant rangeEnd,
             @Param("cancelled") AppointmentStatus cancelled
     );
+
+    @Query("""
+            SELECT DISTINCT a FROM Appointment a
+            JOIN FETCH a.client
+            JOIN FETCH a.professional
+            LEFT JOIN FETCH a.services s
+            LEFT JOIN FETCH s.service
+            WHERE a.client.customerId = :customerId
+            ORDER BY a.startsAt DESC
+            """)
+    List<Appointment> findByClientCustomerId(@Param("customerId") UUID customerId);
 }

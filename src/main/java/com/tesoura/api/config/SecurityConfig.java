@@ -26,9 +26,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final TenantContextFilter tenantContextFilter;
+    private final PublicContextFilter publicContextFilter;
 
-    public SecurityConfig(TenantContextFilter tenantContextFilter) {
+    public SecurityConfig(TenantContextFilter tenantContextFilter, PublicContextFilter publicContextFilter) {
         this.tenantContextFilter = tenantContextFilter;
+        this.publicContextFilter = publicContextFilter;
     }
 
     @Bean
@@ -42,13 +44,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/webhooks/**").permitAll()
+                        .requestMatchers("/api/customer-auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/salons/**").hasRole("OWNER")
                         .requestMatchers(HttpMethod.PATCH, "/api/salons/**").hasRole("OWNER")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(tenantContextFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(tenantContextFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(publicContextFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

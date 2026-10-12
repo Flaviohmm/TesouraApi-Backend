@@ -1,5 +1,7 @@
 package com.tesoura.api.auth;
 
+import com.tesoura.api.customer.Customer;
+import com.tesoura.api.customer.CustomerPrincipal;
 import com.tesoura.api.shared.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -48,6 +50,36 @@ public class JwtService {
                 UUID.fromString(claims.get("salonId", String.class)),
                 UserRole.fromValue(claims.get("role", String.class)),
                 claims.get("email", String.class)
+        );
+    }
+
+    public String generateCustomerToken(Customer customer) {
+        Instant now = Instant.now();
+        Instant expiresAt = now.plusMillis(properties.expirationMs());
+        return Jwts.builder()
+                .subject(customer.getId().toString())
+                .claim("type", "customer")
+                .claim("email", customer.getEmail())
+                .claim("name", customer.getName())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiresAt))
+                .signWith(key)
+                .compact();
+    }
+
+    public CustomerPrincipal parseCustomer(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        if (!"customer".equals(claims.get("type", String.class))) {
+            throw new IllegalArgumentException("Token não é de um cliente");
+        }
+        return new CustomerPrincipal(
+                UUID.fromString(claims.getSubject()),
+                claims.get("email", String.class),
+                claims.get("name", String.class)
         );
     }
 

@@ -42,6 +42,9 @@ public class Client implements TenantAware {
     @Column(name = "loyalty_points")
     private int loyaltyPoints = 0;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
     @Column(name = "created_at", updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -109,6 +112,14 @@ public class Client implements TenantAware {
 
     public void setLoyaltyPoints(int loyaltyPoints) {
         this.loyaltyPoints = loyaltyPoints;
+    }
+
+    public UUID getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(UUID customerId) {
+        this.customerId = customerId;
     }
 
     public Instant getCreatedAt() {
