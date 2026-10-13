@@ -1,6 +1,7 @@
 package com.tesoura.api.config;
 
 import com.tesoura.api.auth.JwtProperties;
+import com.tesoura.api.shared.config.PlatformCommissionProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, PlatformCommissionProperties.class})
 public class SecurityConfig {
 
     private final TenantContextFilter tenantContextFilter;

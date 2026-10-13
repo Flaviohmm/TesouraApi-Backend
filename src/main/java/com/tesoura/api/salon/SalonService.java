@@ -2,6 +2,7 @@ package com.tesoura.api.salon;
 
 import com.tesoura.api.salon.dto.SalonRequestDTO;
 import com.tesoura.api.salon.dto.SalonResponseDTO;
+import com.tesoura.api.shared.config.PlatformCommissionProperties;
 import com.tesoura.api.shared.exception.ResourceNotFoundException;
 import com.tesoura.api.shared.tenant.TenantContext;
 import org.springframework.stereotype.Service;
@@ -11,14 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class SalonService {
 
     private final SalonRepository salonRepository;
+    private final PlatformCommissionProperties commissionProperties;
 
-    public SalonService(SalonRepository salonRepository) {
+    public SalonService(SalonRepository salonRepository, PlatformCommissionProperties commissionProperties) {
         this.salonRepository = salonRepository;
+        this.commissionProperties = commissionProperties;
     }
 
     @Transactional(readOnly = true)
     public SalonResponseDTO getCurrent() {
-        return SalonResponseDTO.from(currentSalon());
+        return SalonResponseDTO.from(currentSalon(), commissionProperties.rate());
     }
 
     @Transactional
@@ -31,7 +34,7 @@ public class SalonService {
             salon.setTimezone(request.timezone());
         }
         salon.setLogoUrl(request.logoUrl());
-        return SalonResponseDTO.from(salonRepository.save(salon));
+        return SalonResponseDTO.from(salonRepository.save(salon), commissionProperties.rate());
     }
 
     public Salon currentSalon() {

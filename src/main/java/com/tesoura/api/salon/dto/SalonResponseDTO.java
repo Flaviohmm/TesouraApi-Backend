@@ -2,6 +2,7 @@ package com.tesoura.api.salon.dto;
 
 import com.tesoura.api.salon.Salon;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,10 +18,11 @@ public record SalonResponseDTO(
         String subscriptionStatus,
         Instant trialEndsAt,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        BigDecimal platformCommissionRate
 ) {
 
-    public static SalonResponseDTO from(Salon salon) {
+    public static SalonResponseDTO from(Salon salon, BigDecimal platformCommissionRate) {
         return new SalonResponseDTO(
                 salon.getId(),
                 salon.getName(),
@@ -33,7 +35,8 @@ public record SalonResponseDTO(
                 salon.getSubscriptionStatus(),
                 salon.getTrialEndsAt(),
                 salon.getCreatedAt(),
-                salon.getUpdatedAt()
+                salon.getUpdatedAt(),
+                platformCommissionRate
         );
     }
 }
