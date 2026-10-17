@@ -2,6 +2,7 @@ package com.tesoura.api.config;
 
 import com.tesoura.api.auth.JwtProperties;
 import com.tesoura.api.shared.config.PlatformCommissionProperties;
+import com.tesoura.api.stripe.StripeProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties({JwtProperties.class, PlatformCommissionProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, PlatformCommissionProperties.class, StripeProperties.class})
 public class SecurityConfig {
 
     private final TenantContextFilter tenantContextFilter;
@@ -49,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/salons/me/stripe/connect").hasRole("OWNER")
                         .requestMatchers(HttpMethod.PUT, "/api/salons/**").hasRole("OWNER")
                         .requestMatchers(HttpMethod.PATCH, "/api/salons/**").hasRole("OWNER")
                         .anyRequest().authenticated()
